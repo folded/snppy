@@ -1,0 +1,7 @@
+# compiled python files
+*.pyc
+
+# backups
+*~
+
+# egg info created by setup.py
