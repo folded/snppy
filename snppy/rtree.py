@@ -1,13 +1,14 @@
 from snppy.range import *
 import itertools
 import math
+import sys
 
 class RTreeNode(object):
   __slots__ = (
     'range', 'children', 'data'
   )
 
-  def search(self, range, out):
+  def _search(self, range, out):
     if not self.range.overlaps(range):
       return
 
@@ -16,7 +17,12 @@ class RTreeNode(object):
         out.append(d)
 
     for c in self.children:
-      c.search(range, out)
+      c._search(range, out)
+
+  def search(self, range):
+    out = []
+    self._search(range, out)
+    return out
 
   def __init__(self, children = [], data = []):
     self.children = children
@@ -77,15 +83,15 @@ class RTreeNode(object):
 
     assert dim < ndim
 
-    P = math.ceil(N / float(child_size))
+    P = int(math.ceil(N / float(child_size)))
     n_parts = int(P ** (1.0 / float(ndim - dim_num)))
-    print 'child_size=', child_size, 'N=', N, 'P=', P, 'n_parts=', n_parts
+
     data.sort(key = lambda x: (x.range.extents[dim][0] + x.range.extents[dim][1]) / 2.0)
 
-    if n_parts == 1 or child_size * dim_num == ndim - 1:
+    if n_parts == 1 or dim_num == ndim - 1:
       s = e = 0
-      for i in range(n_parts):
-        e = N * (i+1) // n_parts;
+      for i in range(P):
+        e = N * (i+1) // P;
         out.append(ctor(data[s:e]))
         s = e
     else:
@@ -109,12 +115,12 @@ class TestRTree(unittest.TestCase):
       thing(Range(((2,3),(2,3))))
     ]
     tree = RTreeNode.construct(things, 2, 2)
-    out = []
-    print tree.search(Range(((0,3),(0,3))), out)
-    print out
-    out = []
-    print tree.search(Range(((-1,0),(-1,0))), out)
-    print out
-    out = []
-    print tree.search(Range(((-2,-1),(-2,-1))), out)
-    print out
+
+    out = tree.search(Range(((0,3),(0,3))))
+    assert len(out) == 4
+
+    out = tree.search(Range(((-1,0),(-1,0))))
+    assert len(out) == 1
+
+    out = tree.search(Range(((-2,-1),(-2,-1))))
+    assert len(out) == 0
