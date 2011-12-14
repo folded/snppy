@@ -1,8 +1,6 @@
 from snppy import range
 from snppy import util
 import re
-import os
-
 
 
 class GFFRecord(object):

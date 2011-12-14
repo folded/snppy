@@ -1,7 +1,6 @@
 from snppy.range import *
 import itertools
 import math
-import sys
 
 class RTreeNode(object):
   __slots__ = (
