@@ -97,14 +97,14 @@ class RTreeNode(object):
       s = 0
       e = 0
       for i in range(P):
-        e = N * (i+1) // P;
+        e = N * (i + 1) // P
         out.append(ctor(data[s:e]))
         s = e
     else:
       s = 0
       e = 0
       for i in range(n_parts):
-        e = N * (i+1) // n_parts;
+        e = N * (i + 1) // n_parts
         cls.makeNodes(data[s:e], ndim, dim_num + 1, dim_mask | (1 << dim), child_size, ctor, out)
         s = e
 
