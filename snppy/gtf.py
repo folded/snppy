@@ -88,8 +88,8 @@ class GTFRecord(GFFRecord):
     'gene_id', 'transcript_id'
   )
 
-  def __init__(self, line):
-    super(GTFRecord, self).__init__(line)
+  def __init__(self):
+    super(GTFRecord, self).__init__()
     self.gene_id = self.attrs['gene_id']
     self.transcript_id = self.attrs['transcript_id']
 
