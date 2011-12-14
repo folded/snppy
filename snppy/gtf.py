@@ -28,7 +28,7 @@ class GFFRecord(object):
 
   @classmethod
   def fmtattrs(cls, **kw):
-    return '; '.join([ k + ' ' + cls._quote(v) for k, v in kw.iteritems() ])
+    return '; '.join([k + ' ' + cls._quote(v) for k, v in kw.iteritems()])
 
   @property
   def range(self):
@@ -47,7 +47,7 @@ class GFFRecord(object):
       '.' if self.score is None else str(self.score),
       self.strand,
       '.' if self.frame is None else str(self.frame),
-      self.fmtattrs(**self.attrs) ])
+      self.fmtattrs(**self.attrs)])
 
   @classmethod
   def parse(cls, line, one_based = True, end_included = False):
@@ -64,12 +64,22 @@ class GFFRecord(object):
     ob.strand = line[6]
     ob.frame = None if line[7] == '.' else int(line[7])
     ob.group = line[8]
-    ob.attrs.update([ (k, cls._unquote(v)) for k, v in cls.group_re.findall(ob.group) ])
+    ob.attrs.update([(k, cls._unquote(v)) for k, v in cls.group_re.findall(ob.group)])
     return ob
 
   def __init__(self):
     super(GFFRecord, self).__init__()
     self.attrs = {}
+    self.seq_id = None
+    self.source = None
+    self.feature = None
+    self.start = None
+    self.end = None
+    self.score = None
+    self.strand = None
+    self.frame = None
+    self.attrs = {}
+    self.group = None
 
 
 
@@ -110,7 +120,6 @@ class GTFFile(object):
   @classmethod
   def read(cls, inf):
     return readrows(inf, GTFRecord)
-
 
 
 __all__ = [

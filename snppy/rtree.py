@@ -29,7 +29,7 @@ class RTreeNode(object):
 
     range_type = self.children[0].range.__class__ if len(self.children) else self.data[0].range.__class__
 
-    self.range = range_type.bounds([ obj.range for obj in itertools.chain(children, data) ])
+    self.range = range_type.bounds([obj.range for obj in itertools.chain(children, data)])
 
   @classmethod
   def makeLeafNode(cls, obs):
@@ -88,13 +88,15 @@ class RTreeNode(object):
     data.sort(key = lambda x: (x.range.extents[dim][0] + x.range.extents[dim][1]) / 2.0)
 
     if n_parts == 1 or dim_num == ndim - 1:
-      s = e = 0
+      s = 0
+      e = 0
       for i in range(P):
         e = N * (i+1) // P;
         out.append(ctor(data[s:e]))
         s = e
     else:
-      s = e = 0
+      s = 0
+      e = 0
       for i in range(n_parts):
         e = N * (i+1) // n_parts;
         cls.makeNodes(data[s:e], ndim, dim_num + 1, dim_mask | (1 << dim), child_size, ctor, out)
@@ -102,24 +104,27 @@ class RTreeNode(object):
 
 
 import unittest
+
+
 class TestRTree(unittest.TestCase):
   def test_RTreeConstruction(self):
     class thing(object):
       def __init__(self, range):
         self.range = range
+
     things = [
-      thing(Range(((0,1),(0,1)))),
-      thing(Range(((2,3),(0,1)))),
-      thing(Range(((0,1),(2,3)))),
-      thing(Range(((2,3),(2,3))))
+      thing(Range(((0, 1), (0, 1)))),
+      thing(Range(((2, 3), (0, 1)))),
+      thing(Range(((0, 1), (2, 3)))),
+      thing(Range(((2, 3), (2, 3))))
     ]
     tree = RTreeNode.construct(things, 2, 2)
 
-    out = tree.search(Range(((0,3),(0,3))))
+    out = tree.search(Range(((0, 3), (0, 3))))
     assert len(out) == 4
 
-    out = tree.search(Range(((-1,0),(-1,0))))
+    out = tree.search(Range(((-1, 0), (-1, 0))))
     assert len(out) == 1
 
-    out = tree.search(Range(((-2,-1),(-2,-1))))
+    out = tree.search(Range(((-2, -1), (-2, -1))))
     assert len(out) == 0
