@@ -31,7 +31,7 @@ class Range(object):
     def _intersection(a, b):
       lo = max(a[0], b[0])
       hi = max(lo, min(a[1], b[1]))
-      return (lo, hi)
+      return lo, hi
 
     return Range(*[ _intersection(a, b) for a, b in zip(self.extents, other.extents) ])
 
