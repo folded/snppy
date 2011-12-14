@@ -23,7 +23,9 @@ class RTreeNode(object):
     self._search(range, out)
     return out
 
-  def __init__(self, children = [], data = []):
+  def __init__(self, children = (), data = ()):
+    children = tuple(children)
+    data = tuple(data)
     self.children = children
     self.data = data
 
