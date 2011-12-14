@@ -1,4 +1,5 @@
-from snppy.range import *
+from snppy import range
+from snppy import util
 import re
 import os
 
@@ -6,61 +7,97 @@ import os
 
 class GFFRecord(object):
   __slots__ = (
-    'seq_id', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame', 'group'
+    'seq_id', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame', 'group', 'attrs'
   )
+
+  group_re = re.compile(
+    r'\s*([^;\s]+)\s+((?:[^";\s]+)|(?:"(?:[^"\\]|\\.)*)")\s*(?:;|$)'
+  )
+
+  @classmethod
+  def _unquote(cls, v):
+    if v.startswith('"'):
+      return re.sub(r'\\(.)', lambda m: m.group(1), v[1:-1])
+    else:
+      return v
+
+  @classmethod
+  def _quote(cls, v):
+    v = str(v)
+    if re.search(r'[\s";]', v) is not None:
+      v = '"' + v.replace('\\', '\\\\').replace('"', '\\"') + '"'
+    return v
+
+  @classmethod
+  def fmtattrs(cls, **kw):
+    return '; '.join([ k + ' ' + cls._quote(v) for k, v in kw.iteritems() ])
 
   @property
   def range(self):
-    return Range((self.start, self.end))
+    return range.Range((self.start, self.end))
 
   def length(self):
     return self.end - self.start
 
-  def __init__(self, line):
-    super(GFFRecord, self).__init__()
+  def asStr(self, one_based = True, end_included = False):
+    return '\t'.join([
+      self.seq_id,
+      self.source,
+      self.feature,
+      str(self.start + (1 if one_based else 0)),
+      str(self.end + (1 if end_included else 0)),
+      '.' if self.score is None else str(self.score),
+      self.strand,
+      '.' if self.frame is None else str(self.frame),
+      self.fmtattrs(**self.attrs) ])
+
+  @classmethod
+  def parse(cls, line, one_based = True, end_included = False):
+    ob = cls()
     line = line.rstrip('\n').split('\t', 8)
-    self.seq_id = line[0]
-    self.source = line[1]
-    self.feature = line[2]
-    self.start = int(line[3]) - 1
-    self.end = int(line[4])
-    self.score = None if line[5] == '.' else float(line[5])
-    self.strand = line[6]
-    self.frame = None if line[7] == '.' else int(line[7])
-    self.group = line[8]
+    ob.seq_id = line[0]
+    ob.source = line[1]
+    ob.feature = line[2]
+    ob.start = int(line[3])
+    ob.end = int(line[4])
+    if one_based: ob.start -= 1
+    if end_included: ob.end -= 1
+    ob.score = None if line[5] == '.' else float(line[5])
+    ob.strand = line[6]
+    ob.frame = None if line[7] == '.' else int(line[7])
+    ob.group = line[8]
+    ob.attrs.update([ (k, cls._unquote(v)) for k, v in cls.group_re.findall(ob.group) ])
+    return ob
+
+  def __init__(self):
+    super(GFFRecord, self).__init__()
+    self.attrs = {}
 
 
 
 class GTFRecord(GFFRecord):
   __slots__ = (
-    'attrs', 'gene_id', 'transcript_id'
+    'gene_id', 'transcript_id'
   )
 
   def __init__(self, line):
     super(GTFRecord, self).__init__(line)
-    self.attrs = [ attr.split(None, 1) for attr in self.group.split('; ') if len(attr.strip()) ]
-    self.gene_id = self.attrs[0][1].strip('"')
-    self.transcript_id = self.attrs[1][1].strip('"')
+    self.gene_id = self.attrs['gene_id']
+    self.transcript_id = self.attrs['transcript_id']
 
 
 
 def readrows(inf, rectype):
   if type(inf) in (str, unicode):
-    ext = os.path.splitext(inf)[1].lower()
-    if ext == '.gz':
-      import gzip
-      inf = gzip.open(inf)
-    elif ext == '.bz2':
-      import bz2
-      inf = bz2.BZ2File(inf)
-    else:
-      inf = open(inf)
+    inf = util.open(inf, 'rbU')
 
   while 1:
     line = inf.readline()
     if line == '':
       break
-    yield rectype(line)
+    if line.startswith('#'):
+      continue
+    yield rectype.parse(line)
 
 
 
