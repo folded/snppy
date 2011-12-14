@@ -41,6 +41,9 @@ class RTreeNode(object):
 
   @classmethod
   def construct(cls, data, leaf_size, internal_size):
+    """
+    iteratively construct an rtree, using the STR criterion.
+    """
     ndim = len(data[0].range.extents)
     out = []
     cls.makeNodes(data, ndim, 0, 0, leaf_size, cls.makeLeafNode, out)
@@ -53,6 +56,9 @@ class RTreeNode(object):
 
   @classmethod
   def makeNodes(cls, data, ndim, dim_num, dim_mask, child_size, ctor, out):
+    """
+    partition data into a set of nodes, using the STR criterion.
+    """
     N = len(data)
 
     r_best = float(N + 1)
