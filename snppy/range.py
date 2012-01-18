@@ -11,6 +11,32 @@ class Range(object):
     if len(a) == 1: a, b = a[0], b[0]
     return '{range:' + repr(a) + '-' + repr(b) + '}'
 
+  def __eq__(self, other):
+    for a, b in zip(self.extents, other.extents):
+      if a != b: return False
+    return True
+
+  def __ne__(self, other):
+    return not self.__eq__(other)
+
+  def __lt__(self, other):
+    for a, b in zip(self.extents, other.extents):
+      if a < b: return True
+      if a > b: return False
+    return False
+
+  def __gt__(self, other):
+    for a, b in zip(self.extents, other.extents):
+      if a > b: return True
+      if a < b: return False
+    return False
+
+  def __le__(self, other):
+    return not self.__gt__(other)
+
+  def __ge__(self, other):
+    return not self.__lt__(other)
+
   def __init__(self, *extents):
     self.extents = extents
 
@@ -27,6 +53,26 @@ class Range(object):
       return 0
     return [ distance1(a, b) for a, b in zip(self.extents, other.extents) ]
     
+  def overlaps(self, other):
+    for a, b in zip(self.extents, other.extents):
+      if b[1] < a[0] or b[0] > a[1]:
+        return False
+    return True
+
+  def contains(self, other):
+    for a, b in zip(self.extents, other.extents):
+      if b[0] > a[0] or b[1] < a[1]:
+        return False
+    return True
+
+  def size(self):
+    return [ a[1] - a[0] for a in self.extents ]
+
+  def isEmpty(self):
+    for a in self.extents:
+      if a[1] > a[0]: return False
+    return True
+
   def intersection(self, other):
     def _intersection(a, b):
       lo = max(a[0], b[0])

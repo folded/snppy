@@ -88,14 +88,19 @@ class GTFRecord(GFFRecord):
     'gene_id', 'transcript_id'
   )
 
+  @classmethod
+  def parse(cls, line, **kw):
+    ob = super(GTFRecord, cls).parse(line, **kw)
+    ob.gene_id = ob.attrs['gene_id']
+    ob.transcript_id = ob.attrs['transcript_id']
+    return ob
+
   def __init__(self):
     super(GTFRecord, self).__init__()
-    self.gene_id = self.attrs['gene_id']
-    self.transcript_id = self.attrs['transcript_id']
 
 
 
-def readrows(inf, rectype):
+def readrows(inf, rectype, **kw):
   if type(inf) in (str, unicode):
     inf = util.open(inf, 'rbU')
 
@@ -105,21 +110,21 @@ def readrows(inf, rectype):
       break
     if line.startswith('#'):
       continue
-    yield rectype.parse(line)
+    yield rectype.parse(line, **kw)
 
 
 
 class GFFFile(object):
   @classmethod
-  def read(cls, inf):
-    return readrows(inf, GFFRecord)
+  def read(cls, inf, **kw):
+    return readrows(inf, GFFRecord, **kw)
 
 
 
 class GTFFile(object):
   @classmethod
-  def read(cls, inf):
-    return readrows(inf, GTFRecord)
+  def read(cls, inf, **kw):
+    return readrows(inf, GTFRecord, **kw)
 
 
 __all__ = [
