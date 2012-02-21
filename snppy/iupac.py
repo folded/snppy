@@ -33,4 +33,4 @@ def fromIUPAC(iupac):
   return __iupac_to_nt.get(iupac.upper(), 'X')
 
 def revcompIUPAC(iupac):
-  return string.translate(iupac, __iupac_revcomp)
+  return ''.join(reversed(string.translate(iupac, __iupac_revcomp)))
