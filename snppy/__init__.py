@@ -5,3 +5,4 @@ import fasta
 import iupac
 import gene
 import iter
+import colour
