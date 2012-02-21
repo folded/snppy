@@ -26,6 +26,15 @@ class Range(object):
         return False
     return True
 
+  @property
+  def midpoint(self):
+    return tuple([ (a[0] + a[1]) / 2.0 for a in self.extents ])
+
+  @property
+  def size(self):
+    return tuple([ a[1] - a[0] for a in self.extents ])
+
+
   def distance(self, other):
     def distance1(a, b):
       if a[0] >= b[1]: return a[0] - b[1]
@@ -44,9 +53,6 @@ class Range(object):
       if b[0] > a[0] or b[1] < a[1]:
         return False
     return True
-
-  def size(self):
-    return [ a[1] - a[0] for a in self.extents ]
 
   def isEmpty(self):
     for a in self.extents:
