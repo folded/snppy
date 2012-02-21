@@ -11,31 +11,11 @@ class Range(object):
     if len(a) == 1: a, b = a[0], b[0]
     return '{range:' + repr(a) + '-' + repr(b) + '}'
 
-  def __eq__(self, other):
+  def __cmp__(self, other):
     for a, b in zip(self.extents, other.extents):
-      if a != b: return False
-    return True
-
-  def __ne__(self, other):
-    return not self.__eq__(other)
-
-  def __lt__(self, other):
-    for a, b in zip(self.extents, other.extents):
-      if a < b: return True
-      if a > b: return False
-    return False
-
-  def __gt__(self, other):
-    for a, b in zip(self.extents, other.extents):
-      if a > b: return True
-      if a < b: return False
-    return False
-
-  def __le__(self, other):
-    return not self.__gt__(other)
-
-  def __ge__(self, other):
-    return not self.__lt__(other)
+      v = cmp(a, b)
+      if v: return v
+    return 0
 
   def __init__(self, *extents):
     self.extents = extents
