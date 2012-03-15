@@ -2,10 +2,12 @@ from snppy import range
 from snppy import util
 import re
 
+_intern = lambda x: x
+# _intern = intern
 
 class GFFRecord(object):
   __slots__ = (
-    'seq_id', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame', 'group', 'attrs'
+    'seq_id', 'source', 'feature', 'start', 'end', 'score', 'strand', 'frame', 'attrs'
   )
 
   group_re = re.compile(
@@ -53,18 +55,17 @@ class GFFRecord(object):
   def parse(cls, line, one_based = True, end_included = False):
     ob = cls()
     line = line.rstrip('\n').split('\t', 8)
-    ob.seq_id = line[0]
-    ob.source = line[1]
-    ob.feature = line[2]
+    ob.seq_id = intern(line[0])
+    ob.source = intern(line[1])
+    ob.feature = intern(line[2])
     ob.start = int(line[3])
     ob.end = int(line[4])
     if one_based: ob.start -= 1
     if end_included: ob.end -= 1
     ob.score = None if line[5] == '.' else float(line[5])
-    ob.strand = line[6]
+    ob.strand = line[6] # single character strings are auto-interned
     ob.frame = None if line[7] == '.' else int(line[7])
-    ob.group = line[8]
-    ob.attrs.update([(k, cls._unquote(v)) for k, v in cls.group_re.findall(ob.group)])
+    ob.attrs.update([(intern(k), intern(cls._unquote(v))) for k, v in cls.group_re.findall(line[8])])
     return ob
 
   def __init__(self):
@@ -79,7 +80,6 @@ class GFFRecord(object):
     self.strand = None
     self.frame = None
     self.attrs = {}
-    self.group = None
 
 
 
