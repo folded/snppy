@@ -1,6 +1,7 @@
 import range
 import iter
 import itertools
+import sys
 
 
 
@@ -69,5 +70,5 @@ class Gene(object):
 def genesFromGTF(gtf_src):
   return [
     Gene.fromGTF(rows)
-    for rows in iter.groupBy(itertools.ifilter(lambda r: r.feature in ('CDS', 'exon'), gtf_src), 'gene_id')
+    for rows in iter.groupByConsecutive(itertools.ifilter(lambda r: r.feature in ('CDS', 'exon'), gtf_src), 'gene_id')
   ]
