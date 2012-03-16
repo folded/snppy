@@ -63,6 +63,16 @@ class Gene(object):
     ob.chromosome = ob.transcripts[0].chromosome
     ob.strand = ob.transcripts[0].strand
     ob.name = ob.transcripts[0].gene
+    ex = {}
+    for i,t in enumerate(ob.transcripts):
+      for e in t.exons:
+        ex.setdefault(e.extents[0], []).append(i)
+    ob.exons = [ (range.Range(k), v) for k, v in sorted(ex.items()) ]
+    for a, a_t in ob.exons:
+      for b, b_t in ob.exons:
+        if a < b and a.overlaps(b):
+          print 'overlap, but not equal', a, b
+    print ob.exons
     return ob
 
 
