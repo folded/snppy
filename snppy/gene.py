@@ -63,17 +63,35 @@ class Gene(object):
     ob.chromosome = ob.transcripts[0].chromosome
     ob.strand = ob.transcripts[0].strand
     ob.name = ob.transcripts[0].gene
-    ex = {}
-    for i,t in enumerate(ob.transcripts):
-      for e in t.exons:
-        ex.setdefault(e.extents[0], []).append(i)
-    ob.exons = [ (range.Range(k), v) for k, v in sorted(ex.items()) ]
-    for a, a_t in ob.exons:
-      for b, b_t in ob.exons:
-        if a < b and a.overlaps(b):
-          print 'overlap, but not equal', a, b
-    print ob.exons
     return ob
+
+  def decomposeTranscripts(self):
+    a = []
+    for i,t in enumerate(self.transcripts):
+      for e in t.exons:
+        a.append((e.extents[0][0], 0, i))
+        a.append((e.extents[0][1], 1, i))
+    a.sort()
+    c = set()
+    lp = a[0][0]
+    tlen = 0
+    ulen = 0
+    n = 0
+    for p, op, i in a:
+      if p > lp:
+        print lp, p, p - lp, len(c), c
+        if len(c):
+          n += 1
+          tlen = tlen + (p - lp)
+          if len(c) == 1:
+            ulen = ulen + (p - lp)
+        lp = p
+      if op == 0:
+        c.add(i)
+      else:
+        c.remove(i)
+
+    print 'XXX %d\t%d\t%f\t%d\t%d\t' % (len(self.transcripts), n, float(ulen) / tlen, ulen, tlen)
 
 
 
